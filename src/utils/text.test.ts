@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { camelToSnakeCase, snakeToCamelCase, sliceContent } from "./text";
+import { camelToSnakeCase, snakeToCamelCase, sliceContent, formatTranslationReply } from "./text";
 
 describe("Text Utilities", () => {
     describe("camelToSnakeCase", () => {
@@ -33,6 +33,24 @@ describe("Text Utilities", () => {
 
         test("returns single item if within limit", () => {
             expect(sliceContent("hello world", 100)).toEqual(["hello world"]);
+        });
+    });
+
+    describe("formatTranslationReply", () => {
+        test("returns empty string for empty input", () => {
+            expect(formatTranslationReply("")).toBe("");
+            expect(formatTranslationReply("   ")).toBe("");
+        });
+
+        test("prepends '🌐> ' when not present", () => {
+            expect(formatTranslationReply("Hello world")).toBe("🌐> Hello world");
+            expect(formatTranslationReply("你好世界")).toBe("🌐> 你好世界");
+        });
+
+        test("normalizes prefix if already present", () => {
+            expect(formatTranslationReply("🌐> Hello world")).toBe("🌐> Hello world");
+            expect(formatTranslationReply("🌐>Hello world")).toBe("🌐> Hello world");
+            expect(formatTranslationReply("🌐>   Hello world")).toBe("🌐> Hello world");
         });
     });
 });

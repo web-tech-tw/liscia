@@ -72,3 +72,16 @@ export function snakeToCamelCase(str: string): string {
         group.toUpperCase().replace("-", "").replace("_", ""),
     );
 }
+
+/**
+ * Ensures the translation response starts with the '🌐>' prefix.
+ */
+export function formatTranslationReply(reply: string): string {
+    const trimmed = reply.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("🌐>")) {
+        const content = trimmed.slice(3).trimStart();
+        return `🌐> ${content}`;
+    }
+    return `🌐> ${trimmed}`;
+}

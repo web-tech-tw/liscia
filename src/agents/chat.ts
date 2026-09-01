@@ -3,6 +3,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import type { ChatAgentParams, ChatAgent } from "../types/agent";
 import type { ChatContext } from "../types/provider";
 import { applyPromptCaching, buildAnthropicProviderOptions, formatUserProfileContext, formatChannelConfigTag } from "../utils/prompts";
+import { formatTranslationReply } from "../utils/text";
 
 const MAX_HISTORY_MESSAGES = 20;
 
@@ -72,7 +73,7 @@ export class Chat implements ChatAgent {
             providerOptions: this.providerOptions,
         });
 
-        const reply = result.text;
+        const reply = formatTranslationReply(result.text);
 
         const userMessage = messages[messages.length - 1];
         if (userMessage) {
