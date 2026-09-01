@@ -1,0 +1,49 @@
+{
+  "name": "liscia",
+  "version": "1.0.0",
+  "author": "Taiwan Web Technology Promotion Organization",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "main": "app.ts",
+  "devDependencies": {
+    "@commitlint/cli": "^17.4.4",
+    "@commitlint/config-conventional": "^17.4.4",
+    "@eslint/js": "^9.21.0",
+    "@types/bun": "^1.3.14",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^9.21.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-jsdoc": "^50.6.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1"
+  },
+  "description": "Discord AI text translation bot powered by Vercel AI SDK.",
+  "homepage": "https://web-tech.tw",
+  "license": "MIT",
+  "lint-staged": {
+    "*.ts": "eslint"
+  },
+  "scripts": {
+    "dev": "bun --hot app.ts",
+    "dev:reload": "bun --watch app.ts",
+    "start": "bun app.ts",
+    "test": "bun test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint . --max-warnings 0",
+    "prepare": "husky install"
+  },
+  "type": "module",
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.39",
+    "ai": "^7.0.66",
+    "discord.js": "^14.27.0"
+  }
+}

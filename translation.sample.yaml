@@ -1,0 +1,30 @@
+# Liscia Discord Translation Configuration
+# 定義各伺服器（Guild）與頻道（Channel）之翻譯語言清單（Locales）
+
+# 預設語言（用於私訊 DM 或未特別配置的頻道）
+default:
+  locales:
+    - en
+    - zh-tw
+
+# 伺服器與頻道配置
+guild:
+  # 範例 1: 伺服器 ID (Guild ID)
+  "123456789012345678":
+    channels:
+      # 雙向翻譯頻道（中英互翻）：
+      # 輸入中文 -> 自動翻譯為英文
+      # 輸入英文 -> 自動翻譯為繁體中文
+      - "123434200000000001":
+          locales:
+            - en
+            - zh-tw
+
+      # 三語翻譯頻道（英、中、日）：
+      # 輸入其中任一語言，自動輸出其餘兩種語言
+      # 例如輸入中文 -> 輸出 [EN] 與 [JA]
+      - "123434200000000002":
+          locales:
+            - en
+            - zh-tw
+            - ja
