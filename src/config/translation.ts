@@ -10,17 +10,21 @@ export interface TranslationConfig {
 }
 
 /**
- * Parses YAML configuration string into structured TranslationConfig.
+ * Parses TOML configuration string into structured TranslationConfig.
+ * Throws an Error if TOML parsing fails.
+ *
+ * @param raw Raw TOML string.
+ * @returns Parsed translation configuration.
  */
-export function parseTranslationYaml(raw: string): TranslationConfig {
-    const defaultLocales: string[] = ["en", "zh-tw"];
+export function parseTranslationToml(raw: string): TranslationConfig {
+    const defaultLocales: string[] = [];
     const channels = new Map<string, ChannelTranslationConfig>();
 
     if (!raw || !raw.trim()) {
         return { defaultLocales, channels };
     }
 
-    const parsed = Bun.YAML.parse(raw) as Record<string, unknown> | null;
+    const parsed = Bun.TOML.parse(raw) as Record<string, unknown> | null;
     if (!parsed || typeof parsed !== "object") {
         return { defaultLocales, channels };
     }
@@ -28,7 +32,6 @@ export function parseTranslationYaml(raw: string): TranslationConfig {
     // 1. Parse default locales
     const defaultSection = (parsed.default || parsed.defaults) as Record<string, unknown> | undefined;
     if (defaultSection && Array.isArray(defaultSection.locales)) {
-        defaultLocales.length = 0;
         for (const loc of defaultSection.locales) {
             if (typeof loc === "string" && loc.trim()) {
                 defaultLocales.push(loc.trim().toLowerCase());
@@ -87,10 +90,22 @@ export function parseTranslationYaml(raw: string): TranslationConfig {
 
     // 2. Parse guild / gulid / guilds sections
     const guildSection = (parsed.guild || parsed.gulid || parsed.guilds) as Record<string, unknown> | undefined;
-    if (guildSection && typeof guildSection === "object") {
-        for (const [guildId, guildData] of Object.entries(guildSection)) {
-            if (guildData && typeof guildData === "object" && "channels" in guildData) {
-                parseChannelsNode((guildData as Record<string, unknown>).channels, guildId);
+    if (guildSection) {
+        if (Array.isArray(guildSection)) {
+            for (const guildData of guildSection) {
+                if (guildData && typeof guildData === "object") {
+                    const rec = guildData as Record<string, unknown>;
+                    const gId = rec.id || rec.guildId;
+                    if (rec.channels) {
+                        parseChannelsNode(rec.channels, gId ? String(gId) : undefined);
+                    }
+                }
+            }
+        } else if (typeof guildSection === "object") {
+            for (const [guildId, guildData] of Object.entries(guildSection)) {
+                if (guildData && typeof guildData === "object" && "channels" in guildData) {
+                    parseChannelsNode((guildData as Record<string, unknown>).channels, guildId);
+                }
             }
         }
     }
@@ -101,7 +116,7 @@ export function parseTranslationYaml(raw: string): TranslationConfig {
     }
 
     return {
-        defaultLocales: defaultLocales.length > 0 ? defaultLocales : ["en", "zh-tw"],
+        defaultLocales,
         channels,
     };
 }
@@ -109,55 +124,63 @@ export function parseTranslationYaml(raw: string): TranslationConfig {
 let cachedConfig: TranslationConfig | null = null;
 
 /**
- * Loads translation config from disk, checking TRANSLATION_CONFIG_PATH, translation.yaml, and translation.yml.
+ * Sets or clears the cached translation configuration.
+ *
+ * @param config Configuration to cache or null to clear.
+ */
+export function setCachedTranslationConfig(config: TranslationConfig | null): void {
+    cachedConfig = config;
+}
+
+/**
+ * Loads translation config from disk without fallback.
+ * Checks customPath, TRANSLATION_CONFIG_PATH env, or default "./translation.toml".
+ * Throws an Error if the file does not exist or fails to parse.
+ *
+ * @param customPath Optional custom path to translation config file.
+ * @returns Loaded translation configuration.
  */
 export async function loadTranslationConfig(customPath?: string): Promise<TranslationConfig> {
-    const candidatePaths = [
-        customPath,
-        Bun.env.TRANSLATION_CONFIG_PATH,
-        "./translation.yaml",
-        "./translation.yml",
-    ].filter((p): p is string => Boolean(p && p.trim()));
+    const configPath = customPath || Bun.env.TRANSLATION_CONFIG_PATH || "./translation.toml";
+    const file = Bun.file(configPath);
 
-    for (const filePath of candidatePaths) {
-        const file = Bun.file(filePath);
-        if (await file.exists()) {
-            try {
-                const text = await file.text();
-                const config = parseTranslationYaml(text);
-                console.info(`[TranslationConfig] Loaded configuration from ${filePath} (${config.channels.size} channels mapped)`);
-                cachedConfig = config;
-                return config;
-            } catch (err) {
-                console.error(`[TranslationConfig] Failed to parse ${filePath}:`, err);
-            }
-        }
+    if (!(await file.exists())) {
+        throw new Error(`[TranslationConfig] Configuration file not found at "${configPath}". Please provide translation.toml or set TRANSLATION_CONFIG_PATH.`);
     }
 
-    console.warn("[TranslationConfig] No translation.yaml found; falling back to default locales [en, zh-tw]");
-    const fallback: TranslationConfig = {
-        defaultLocales: ["en", "zh-tw"],
-        channels: new Map(),
-    };
-    cachedConfig = fallback;
-    return fallback;
+    try {
+        const text = await file.text();
+        const config = parseTranslationToml(text);
+        console.info(`[TranslationConfig] Loaded configuration from ${configPath} (${config.channels.size} channels mapped)`);
+        cachedConfig = config;
+        return config;
+    } catch (err) {
+        throw new Error(
+            `[TranslationConfig] Failed to parse ${configPath}: ${err instanceof Error ? err.message : String(err)}`,
+            { cause: err },
+        );
+    }
 }
 
 /**
  * Gets cached translation config synchronously.
+ * Throws an Error if configuration has not been loaded.
+ *
+ * @returns Cached translation configuration.
  */
 export function getTranslationConfig(): TranslationConfig {
     if (!cachedConfig) {
-        cachedConfig = {
-            defaultLocales: ["en", "zh-tw"],
-            channels: new Map(),
-        };
+        throw new Error("[TranslationConfig] Configuration has not been loaded. Call loadTranslationConfig() first.");
     }
     return cachedConfig;
 }
 
 /**
  * Returns configured locales for a specific channel.
+ *
+ * @param channelId Discord channel ID.
+ * @param config Optional loaded translation configuration.
+ * @returns Array of locales or undefined.
  */
 export function getChannelLocales(channelId: string, config?: TranslationConfig): string[] | undefined {
     const cfg = config || getTranslationConfig();

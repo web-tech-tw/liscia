@@ -1,12 +1,12 @@
 # Liscia (莉西亞)
 
-專用於 Discord 的多語言文字翻譯機器人，由 `translation.yaml` 設定各伺服器與頻道的語言清單，在頻道中自動將發言翻譯為目標語言。
+專用於 Discord 的多語言文字翻譯機器人，由 `translation.toml` 設定各伺服器與頻道的語言清單，在頻道中自動將發言翻譯為目標語言。
 
 ---
 
 ## 功能特色
 
-* **頻道多語言自動翻譯**：在 `translation.yaml` 設定頻道對應的語言代碼（如 `en`, `zh-tw`, `ja`），自動偵測發言語言並翻譯為其他指定語言。
+* **頻道多語言自動翻譯**：在 `translation.toml` 設定頻道對應的語言代碼（如 `en`, `zh-tw`, `ja`），自動偵測發言語言並翻譯為其他指定語言。
 * **格式完整保留**：翻譯時保留 Markdown 排版、程式碼區塊、行內代碼、URLs、Emoji 與 Discord 提及標籤。
 * **譯文乾淨直出**：不添加任何多餘問候或前後綴廢話，直接輸出翻譯結果。
 
@@ -39,36 +39,27 @@ cp .env.sample .env
 | `DISCORD_BOT_TOKEN` | Discord Bot Token |
 | `DISCORD_PRESENCE` | Bot 狀態文字（預設：`Chief Translator`） |
 
-### 4. 設定 `translation.yaml`
+### 4. 設定 `translation.toml`
 
-複製 `translation.sample.yaml` 為 `translation.yaml`，並依各伺服器與頻道需求配置語言清單：
+複製 `translation.sample.toml` 為 `translation.toml`，並依各伺服器與頻道需求配置語言清單：
 
 ```bash
-cp translation.sample.yaml translation.yaml
+cp translation.sample.toml translation.toml
 ```
 
-```yaml
-# translation.yaml 範例
-default:
-  locales:
-    - en
-    - zh-tw
+```toml
+# translation.toml 範例
+[default]
+locales = ["en", "zh-tw"]
 
-guild:
-  "123456789012345678":
-    channels:
-      # 雙向翻譯頻道：輸入中文翻英文，輸入英文翻繁體中文
-      - "123434200000000001":
-          locales:
-            - en
-            - zh-tw
+# 伺服器與頻道配置
+# 雙向翻譯頻道：輸入中文翻英文，輸入英文翻繁體中文
+[guild."123456789012345678".channels."123434200000000001"]
+locales = ["en", "zh-tw"]
 
-      # 三語翻譯頻道：輸入其中一語，輸出其餘兩種語言（附語言標籤）
-      - "123434200000000002":
-          locales:
-            - en
-            - zh-tw
-            - ja
+# 三語翻譯頻道：輸入其中一語，輸出其餘兩種語言（附語言標籤）
+[guild."123456789012345678".channels."123434200000000002"]
+locales = ["en", "zh-tw", "ja"]
 ```
 
 ### 5. 啟動服務
@@ -87,11 +78,11 @@ bun run start
 
 ```text
 ├── app.ts                  # 服務進入點（啟動 Discord 翻譯機器人）
-├── translation.sample.yaml # 頻道翻譯設定檔範本
+├── translation.sample.toml # 頻道翻譯設定檔範本
 ├── settings.xml            # 翻譯專家系統提示詞（包含動態語言規則）
 ├── src/
 │   ├── config/
-│   │   ├── translation.ts  # YAML 設定檔解析與頻道語言查詢
+│   │   ├── translation.ts  # TOML 設定檔解析與頻道語言查詢
 │   │   └── translation.test.ts
 │   ├── agents/
 │   │   ├── chat.ts         # 翻譯 Agent 與記憶體 Session Store
