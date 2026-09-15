@@ -1,8 +1,8 @@
 import { generateText, type ModelMessage } from "ai";
-import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { ChatAgentParams, ChatAgent } from "../types/agent";
 import type { ChatContext } from "../types/provider";
-import { applyPromptCaching, buildAnthropicProviderOptions, formatUserProfileContext, formatChannelConfigTag } from "../utils/prompts";
+import { formatUserProfileContext, formatChannelConfigTag } from "../utils/prompts";
 import { formatTranslationReply } from "../utils/text";
 
 const MAX_HISTORY_MESSAGES = 20;
@@ -57,7 +57,7 @@ export class Chat implements ChatAgent {
         };
 
         return [
-            ...applyPromptCaching(historyMessages),
+            ...historyMessages,
             userMessage,
         ];
     }
@@ -94,21 +94,17 @@ export class Chat implements ChatAgent {
  * Creates a new Chat instance initialized with system settings.
  */
 export async function createChatAgent(): Promise<Chat> {
-    const anthropic = createAnthropic({
-        apiKey: Bun.env.ANTHROPIC_API_KEY,
-        baseURL: Bun.env.ANTHROPIC_BASE_URL,
+    const nim = createOpenAICompatible({
+        name: "nim",
+        baseURL: Bun.env.NIM_BASE_URL || "https://integrate.api.nvidia.com/v1",
+        apiKey: Bun.env.NIM_API_KEY,
     });
 
     const settingsFile = Bun.file("./settings.xml");
     const instructions = await settingsFile.text();
 
-    const providerOptions = buildAnthropicProviderOptions({
-        thinking: Bun.env.ANTHROPIC_THINKING,
-    });
-
     return new Chat({
-        model: anthropic(Bun.env.ANTHROPIC_MODEL || "claude-sonnet-5"),
+        model: nim(Bun.env.NIM_MODEL || "openai/gpt-oss-120b"),
         instructions,
-        providerOptions,
     });
 }

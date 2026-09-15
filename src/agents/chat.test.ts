@@ -3,6 +3,8 @@ import {
     getSessionHistory,
     appendSessionMessage,
     clearSessionHistory,
+    createChatAgent,
+    Chat,
 } from "./chat";
 
 describe("Chat Agent In-Memory Session Store", () => {
@@ -53,3 +55,11 @@ describe("Chat Agent In-Memory Session Store", () => {
         expect(getSessionHistory("discord:2")).toEqual([]);
     });
 });
+
+describe("createChatAgent", () => {
+    it("should instantiate Chat with NIM OpenAI-compatible provider", async () => {
+        const agent = await createChatAgent();
+        expect(agent).toBeInstanceOf(Chat);
+    });
+});
+

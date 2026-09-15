@@ -34,8 +34,9 @@ cp .env.sample .env
 
 | 變數名稱 | 說明 |
 | :--- | :--- |
-| `ANTHROPIC_API_KEY` | Anthropic API 金鑰 |
-| `ANTHROPIC_MODEL` | 模型名稱（預設：`claude-sonnet-5`） |
+| `NIM_API_KEY` | NVIDIA NIM API 金鑰 |
+| `NIM_BASE_URL` | NVIDIA NIM API 基礎網址（預設：`https://integrate.api.nvidia.com/v1`） |
+| `NIM_MODEL` | 模型名稱（預設：`openai/gpt-oss-120b`） |
 | `DISCORD_BOT_TOKEN` | Discord Bot Token |
 | `DISCORD_PRESENCE` | Bot 狀態文字（預設：`Chief Translator`） |
 
