@@ -57,7 +57,7 @@ describe("Chat Agent In-Memory Session Store", () => {
 });
 
 describe("createChatAgent", () => {
-    it("should instantiate Chat with NIM OpenAI-compatible provider", async () => {
+    it("should instantiate Chat with OpenAI-compatible provider", async () => {
         const agent = await createChatAgent();
         expect(agent).toBeInstanceOf(Chat);
     });

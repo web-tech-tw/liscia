@@ -34,9 +34,9 @@ cp .env.sample .env
 
 | 變數名稱 | 說明 |
 | :--- | :--- |
-| `NIM_API_KEY` | NVIDIA NIM API 金鑰 |
-| `NIM_BASE_URL` | NVIDIA NIM API 基礎網址（預設：`https://integrate.api.nvidia.com/v1`） |
-| `NIM_MODEL` | 模型名稱（預設：`openai/gpt-oss-120b`） |
+| `OPENAI_API_KEY` | OpenAI 相容 API 金鑰 |
+| `OPENAI_BASE_URL` | OpenAI 相容 API 基礎網址 |
+| `OPENAI_MODEL` | 模型名稱 |
 | `DISCORD_BOT_TOKEN` | Discord Bot Token |
 | `DISCORD_PRESENCE` | Bot 狀態文字（預設：`Chief Translator`） |
 

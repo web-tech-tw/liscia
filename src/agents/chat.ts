@@ -91,20 +91,27 @@ export class Chat implements ChatAgent {
 }
 
 /**
+ * Creates an OpenAI-compatible provider instance.
+ */
+export function createOpenAICompatibleProvider(options?: { apiKey?: string; baseURL?: string }) {
+    return createOpenAICompatible({
+        name: "openai-compatible",
+        baseURL: options?.baseURL || Bun.env.OPENAI_BASE_URL || "",
+        apiKey: options?.apiKey || Bun.env.OPENAI_API_KEY,
+    });
+}
+
+/**
  * Creates a new Chat instance initialized with system settings.
  */
 export async function createChatAgent(): Promise<Chat> {
-    const nim = createOpenAICompatible({
-        name: "nim",
-        baseURL: Bun.env.NIM_BASE_URL || "https://integrate.api.nvidia.com/v1",
-        apiKey: Bun.env.NIM_API_KEY,
-    });
+    const provider = createOpenAICompatibleProvider();
 
     const settingsFile = Bun.file("./settings.xml");
     const instructions = await settingsFile.text();
 
     return new Chat({
-        model: nim(Bun.env.NIM_MODEL || "openai/gpt-oss-120b"),
+        model: provider(Bun.env.OPENAI_MODEL || ""),
         instructions,
     });
 }
