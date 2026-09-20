@@ -5,6 +5,7 @@ import {
     clearSessionHistory,
     createChatAgent,
     Chat,
+    stripReasoningContentFromMessages,
 } from "./chat";
 
 describe("Chat Agent In-Memory Session Store", () => {
@@ -62,4 +63,44 @@ describe("createChatAgent", () => {
         expect(agent).toBeInstanceOf(Chat);
     });
 });
+
+describe("stripReasoningContentFromMessages", () => {
+    it("should strip reasoning_content and reasoning from assistant messages", () => {
+        const input: Record<string, unknown> = {
+            model: "openai/gpt-oss-120b",
+            messages: [
+                { role: "system", content: "You are a translator." },
+                { role: "user", content: "Hello!" },
+                {
+                    role: "assistant",
+                    content: "你好！",
+                    reasoning_content: "User said hello in English, translate to Traditional Chinese.",
+                    reasoning: "Some reasoning text.",
+                },
+                { role: "user", content: "How are you?" },
+            ],
+        };
+
+        const result = stripReasoningContentFromMessages(input);
+
+        expect(result.model).toBe("openai/gpt-oss-120b");
+        const messages = result.messages as Array<Record<string, unknown>>;
+        expect(messages).toHaveLength(4);
+
+        expect(messages[0]).toEqual({ role: "system", content: "You are a translator." });
+        expect(messages[1]).toEqual({ role: "user", content: "Hello!" });
+        expect(messages[3]).toEqual({ role: "user", content: "How are you?" });
+
+        expect(messages[2]).toEqual({ role: "assistant", content: "你好！" });
+        expect("reasoning_content" in (messages[2] ?? {})).toBe(false);
+        expect("reasoning" in (messages[2] ?? {})).toBe(false);
+    });
+
+    it("should return original args if messages is not an array", () => {
+        const input: Record<string, unknown> = { model: "test" };
+        const result = stripReasoningContentFromMessages(input);
+        expect(result).toBe(input);
+    });
+});
+
 
