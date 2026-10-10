@@ -1,101 +1,128 @@
 # Liscia (莉西亞)
 
-專用於 Discord 的多語言文字翻譯機器人，由 `translation.toml` 設定各伺服器與頻道的語言清單，在頻道中自動將發言翻譯為目標語言。
+[正體中文](README.zh-TW.md) | English
 
----
+A multilingual text translation bot built for Discord.
 
-## 功能特色
+Have you ever wanted a Discord channel that welcomes every language,
+but the conversation always ends up split into separate corners?
 
-* **頻道多語言自動翻譯**：在 `translation.toml` 設定頻道對應的語言代碼（如 `en`, `zh-tw`, `ja`），自動偵測發言語言並翻譯為其他指定語言。
-* **格式完整保留**：翻譯時保留 Markdown 排版、程式碼區塊、行內代碼、URLs、Emoji 與 Discord 提及標籤。
-* **譯文乾淨直出**：不添加任何多餘問候或前後綴廢話，直接輸出翻譯結果。
+Through Liscia,
+each member simply types in their own language,
+and the bot automatically translates the message into every other configured language.
 
----
+No commands. No copy-pasting. No language barriers.
 
-## 快速開始
+## Features
 
-### 1. 環境需求
+* **Channel-based multilingual translation**
+  Define the locale list for each channel in `translation.toml`.
+  Liscia detects the language of each message and replies with translations into all the other locales.
+* **Formatting fully preserved**
+  Markdown layout, code blocks, inline code, URLs, emoji, and Discord mentions are kept intact.
+* **Clean, direct output**
+  No greetings, no preambles, no extra fluff.
+  The bot outputs the translation and nothing else.
+
+## Quick Start
+
+### Prerequisites
 
 * [Bun](https://bun.sh/) (>= 1.2)
+* A Discord bot token
+* An OpenAI-compatible API key
 
-### 2. 安裝依賴
+### Install
 
-```bash
+```sh
 bun install
 ```
 
-### 3. 環境變數設定
+### Environment Variables
 
-複製 `.env.sample` 為 `.env` 並填入金鑰：
+Copy `.env.sample` to `.env` and fill in your credentials:
 
-```bash
+```sh
 cp .env.sample .env
 ```
 
-| 變數名稱 | 說明 |
-| :--- | :--- |
-| `OPENAI_API_KEY` | OpenAI 相容 API 金鑰 |
-| `OPENAI_BASE_URL` | OpenAI 相容 API 基礎網址 |
-| `OPENAI_MODEL` | 模型名稱 |
-| `DISCORD_BOT_TOKEN` | Discord Bot Token |
-| `DISCORD_PRESENCE` | Bot 狀態文字（預設：`Chief Translator`） |
+| Variable            | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `OPENAI_API_KEY`    | OpenAI-compatible API key                                     |
+| `OPENAI_BASE_URL`   | OpenAI-compatible base URL                                    |
+| `OPENAI_MODEL`      | Model name                                                   |
+| `DISCORD_BOT_TOKEN` | Discord bot token                                            |
+| `DISCORD_PRESENCE`  | Bot presence text (default: `Chief Translator`)               |
 
-### 4. 設定 `translation.toml`
+### Configure `translation.toml`
 
-複製 `translation.sample.toml` 為 `translation.toml`，並依各伺服器與頻道需求配置語言清單：
+Copy `translation.sample.toml` to `translation.toml`,
+then define the locale list for each guild and channel:
 
-```bash
+```sh
 cp translation.sample.toml translation.toml
 ```
 
 ```toml
-# translation.toml 範例
+# Default locales (used for DMs and unconfigured channels)
 [default]
 locales = ["en", "zh-tw"]
 
-# 伺服器與頻道配置
-# 雙向翻譯頻道：輸入中文翻英文，輸入英文翻繁體中文
+# Bilingual channel (EN <-> zh-TW):
+# Type in Chinese -> translated to English
+# Type in English -> translated to Traditional Chinese
 [guild."123456789012345678".channels."123434200000000001"]
 locales = ["en", "zh-tw"]
 
-# 三語翻譯頻道：輸入其中一語，輸出其餘兩種語言（附語言標籤）
+# Trilingual channel (EN, zh-TW, JA):
+# Type in any one of the locales -> replies with the other two
 [guild."123456789012345678".channels."123434200000000002"]
 locales = ["en", "zh-tw", "ja"]
 ```
 
-### 5. 啟動服務
+### Run
 
-```bash
-# 開發模式（熱重載）
+```sh
+# Development (hot reload)
 bun run dev
 
-# 正式運行
+# Production
 bun run start
 ```
 
----
+Or run it with Docker:
 
-## 專案架構
-
-```text
-├── app.ts                  # 服務進入點（啟動 Discord 翻譯機器人）
-├── translation.sample.toml # 頻道翻譯設定檔範本
-├── settings.xml            # 翻譯專家系統提示詞（包含動態語言規則）
-├── src/
-│   ├── config/
-│   │   ├── translation.ts  # TOML 設定檔解析與頻道語言查詢
-│   │   └── translation.test.ts
-│   ├── agents/
-│   │   ├── chat.ts         # 翻譯 Agent 與記憶體 Session Store
-│   │   └── chat.test.ts
-│   ├── providers/
-│   │   └── discord.ts      # Discord Bot 適配器（自動監聽設定頻道）
-│   ├── types/              # 型別定義
-│   └── utils/              # 輔助函式（文字分塊、Prompt 快取）
+```sh
+docker build -t liscia .
+docker run --env-file .env -v "$(pwd)/translation.toml:/app/translation.toml" liscia
 ```
 
----
+## Development
 
-## 授權
+```sh
+bun test       # Run tests
+bun run lint   # Run ESLint
+```
 
-本專案採用 [MIT License](LICENSE) 授權。
+## Project Structure
+
+```text
+├── app.ts                  # Entry point (starts the Discord translation bot)
+├── translation.sample.toml # Sample channel translation config
+├── settings.xml            # Translation system prompt (with dynamic language rules)
+└── src/
+    ├── config/
+    │   ├── translation.ts  # TOML config parsing and per-channel locale lookup
+    │   └── translation.test.ts
+    ├── agents/
+    │   ├── chat.ts         # Translation agent with in-memory session store
+    │   └── chat.test.ts
+    ├── providers/
+    │   └── discord.ts     # Discord adapter (watches configured channels)
+    ├── types/              # Type definitions
+    └── utils/              # Helpers (text chunking, prompt caching)
+```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
