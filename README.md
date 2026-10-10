@@ -54,6 +54,26 @@ cp .env.sample .env
 | `DISCORD_BOT_TOKEN` | Discord bot token                                            |
 | `DISCORD_PRESENCE`  | Bot presence text (default: `Chief Translator`)               |
 
+### Don't Have an LLM API Key?
+
+No budget for an LLM API? No problem!
+
+[NVIDIA Build](https://build.nvidia.com/explore/discover) hosts 100+ models
+behind a free, OpenAI-compatible API.
+Sign up with an email, no credit card required,
+open any model page, and click **Get API Key** to receive a free `nvapi-` key.
+
+Liscia runs on it out of the box.
+The recommended model is **`openai/gpt-oss-20b`**,
+an open-weight model with strong multilingual reasoning and low latency —
+it is also the default in `.env.sample`:
+
+```sh
+OPENAI_API_KEY="nvapi-..."
+OPENAI_BASE_URL="https://integrate.api.nvidia.com/v1"
+OPENAI_MODEL="openai/gpt-oss-20b"
+```
+
 ### Configure `translation.toml`
 
 Copy `translation.sample.toml` to `translation.toml`,

@@ -54,6 +54,26 @@ cp .env.sample .env
 | `DISCORD_BOT_TOKEN` | Discord Bot Token                           |
 | `DISCORD_PRESENCE`  | Bot 狀態文字（預設：`Chief Translator`）     |
 
+### 沒有 LLM API 金鑰嗎？
+
+沒有預算申請 LLM API？沒問題！
+
+[NVIDIA Build](https://build.nvidia.com/explore/discover) 提供了 100 多個模型，
+全部掛在免費的 OpenAI 相容 API 後面。
+只要用 Email 註冊，完全不用信用卡，
+開啟任意模型頁面，點擊 **Get API Key** 即可取得免費的 `nvapi-` 金鑰。
+
+Liscia 開箱即用。
+推薦模型是 **`openai/gpt-oss-20b`**，
+開放權重、多語言推理能力強且延遲低 —
+同時也是 `.env.sample` 的預設值：
+
+```sh
+OPENAI_API_KEY="nvapi-..."
+OPENAI_BASE_URL="https://integrate.api.nvidia.com/v1"
+OPENAI_MODEL="openai/gpt-oss-20b"
+```
+
 ### 設定 `translation.toml`
 
 複製 `translation.sample.toml` 為 `translation.toml`，

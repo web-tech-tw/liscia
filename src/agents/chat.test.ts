@@ -67,7 +67,7 @@ describe("createChatAgent", () => {
 describe("stripReasoningContentFromMessages", () => {
     it("should strip reasoning_content and reasoning from assistant messages", () => {
         const input: Record<string, unknown> = {
-            model: "openai/gpt-oss-120b",
+            model: "openai/gpt-oss-20b",
             messages: [
                 { role: "system", content: "You are a translator." },
                 { role: "user", content: "Hello!" },
@@ -83,7 +83,7 @@ describe("stripReasoningContentFromMessages", () => {
 
         const result = stripReasoningContentFromMessages(input);
 
-        expect(result.model).toBe("openai/gpt-oss-120b");
+        expect(result.model).toBe("openai/gpt-oss-20b");
         const messages = result.messages as Array<Record<string, unknown>>;
         expect(messages).toHaveLength(4);
 
